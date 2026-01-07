@@ -137,3 +137,41 @@ class TaskConfig(GenerationConfig):
 ```
 
 **Single entry point:** `python examples/generate.py --num-samples 50`
+
+---
+
+## 🎯 Available Tasks
+
+### Color Sorting Task (颜色分类分拣)
+
+A visual reasoning task where colored blocks must be sorted into matching containers.
+
+**Task Description:**
+- **Input:** Canvas with colored containers (empty frames) and scattered colored blocks
+- **Output:** All blocks moved into their matching color containers, arranged in a grid layout
+
+**Example Prompt:**
+> "The image shows scattered colored blocks and empty containers. Move each block into the container that matches its color. Arrange the blocks neatly inside the containers."
+
+**Usage:**
+```bash
+python examples/generate_color_sorting.py --num-samples 10
+```
+
+**Configuration Options (`src/color_sorting_task.py`):**
+| Parameter | Default | Description |
+|-----------|---------|-------------|
+| `num_colors` | 2-4 | Number of different colors/containers |
+| `blocks_per_color` | 2-5 | Number of blocks for each color |
+| `container_size` | 150 | Size of each container (pixels) |
+| `block_size` | 30 | Size of each block (pixels) |
+| `image_size` | (800, 600) | Canvas dimensions |
+
+**Output Structure:**
+```
+data/questions/color_sorting_task/{task_id}/
+├── first_frame.png    # Scattered blocks + empty containers
+├── final_frame.png    # Sorted blocks in matching containers
+├── prompt.txt         # Task instructions
+└── ground_truth.mp4   # Animation of sorting process
+```
