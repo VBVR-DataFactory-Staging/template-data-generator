@@ -137,3 +137,41 @@ class TaskConfig(GenerationConfig):
 ```
 
 **Single entry point:** `python examples/generate.py --num-samples 50`
+
+---
+
+## 🎯 Available Tasks
+
+### Path Planning Task (避障路径规划)
+
+A visual reasoning task where a path must be found from start to goal avoiding obstacles.
+
+**Task Description:**
+- **Input:** Grid map with black obstacles, red start point, and green goal point
+- **Output:** Same map with a blue path drawn from start to goal, avoiding all obstacles
+
+**Example Prompt:**
+> "Draw a continuous line from the red start circle to the green goal circle, avoiding all black obstacles."
+
+**Usage:**
+```bash
+python examples/generate_path_planning.py --num-samples 10
+python examples/generate_path_planning.py --num-samples 50 --grid-width 20 --grid-height 15
+```
+
+**Configuration Options:**
+| Parameter | Default | Description |
+|-----------|---------|-------------|
+| `grid_width` | 15 | Grid width in cells |
+| `grid_height` | 10 | Grid height in cells |
+| `cell_size` | 40 | Cell size in pixels |
+| `obstacle_density` | 0.25 | Percentage of cells as obstacles (0.0-1.0) |
+
+**Output Structure:**
+```
+data/questions/path_planning_task/{task_id}/
+├── first_frame.png    # Map with obstacles, start, and goal
+├── final_frame.png    # Map with solution path drawn
+├── prompt.txt         # Task instructions
+└── ground_truth.mp4   # Animation of path being drawn
+```
