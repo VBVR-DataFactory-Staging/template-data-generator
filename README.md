@@ -137,3 +137,43 @@ class TaskConfig(GenerationConfig):
 ```
 
 **Single entry point:** `python examples/generate.py --num-samples 50`
+
+---
+
+## 🎯 Available Tasks
+
+### Size Sorting Task (矩形条高度排序)
+
+A visual reasoning task where scattered bars must be sorted by height.
+
+**Task Description:**
+- **Input:** Canvas with scattered colorful bars of different heights
+- **Output:** Bars sorted by height (ascending or descending) and aligned at the baseline
+
+**Example Prompt:**
+> "Sort the scattered bars from shortest to tallest. Align them horizontally at the bottom."
+
+**Usage:**
+```bash
+python examples/generate_size_sorting.py --num-samples 10
+python examples/generate_size_sorting.py --num-samples 50 --num-bars 10 --sort-order descending
+```
+
+**Configuration Options:**
+| Parameter | Default | Description |
+|-----------|---------|-------------|
+| `num_bars` | 7 | Number of bars to sort |
+| `bar_width` | 40 | Width of each bar (pixels) |
+| `min_height` | 50 | Minimum bar height |
+| `max_height` | 250 | Maximum bar height |
+| `sort_order` | ascending | Sort order: ascending/descending |
+| `image_size` | (800, 400) | Canvas dimensions |
+
+**Output Structure:**
+```
+data/questions/size_sorting_task/{task_id}/
+├── first_frame.png    # Scattered bars
+├── final_frame.png    # Sorted bars aligned at baseline
+├── prompt.txt         # Task instructions
+└── ground_truth.mp4   # Animation of sorting process
+```
