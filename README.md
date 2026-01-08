@@ -137,3 +137,40 @@ class TaskConfig(GenerationConfig):
 ```
 
 **Single entry point:** `python examples/generate.py --num-samples 50`
+
+---
+
+## 🎯 Available Tasks
+
+### Shape Matching Task (几何形状匹配)
+
+A visual reasoning task where shapes must be moved into their matching outlines.
+
+**Task Description:**
+- **Input:** Colored shapes (circle, square, triangle, star) scattered on left side, empty outlines on right side
+- **Output:** Colored shapes moved to fill their corresponding outlines
+
+**Example Prompt:**
+> "Move each colorful shape into its corresponding dark outline."
+
+**Usage:**
+```bash
+python examples/generate_shape_matching.py --num-samples 10
+python examples/generate_shape_matching.py --num-samples 50 --num-shapes 3 --shape-size 40
+```
+
+**Configuration Options:**
+| Parameter | Default | Description |
+|-----------|---------|-------------|
+| `num_shapes` | 4 | Number of shapes (max 4: circle, square, triangle, star) |
+| `shape_size` | 35 | Size of shapes in pixels |
+| `image_size` | (800, 400) | Canvas dimensions |
+
+**Output Structure:**
+```
+data/questions/shape_matching_task/{task_id}/
+├── first_frame.png    # Shapes scattered, outlines empty
+├── final_frame.png    # Shapes filling their outlines
+├── prompt.txt         # Task instructions
+└── ground_truth.mp4   # Animation of shapes moving
+```
