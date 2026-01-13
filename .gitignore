@@ -113,3 +113,6 @@ Thumbs.db
 ehthumbs.db
 Desktop.ini
 $RECYCLE.BIN/
+
+# Blender installation (large binary files)
+blender/

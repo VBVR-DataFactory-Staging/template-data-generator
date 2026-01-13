@@ -1,16 +1,7 @@
 # Core dependencies
-numpy==1.26.4
-Pillow==10.4.0
-pydantic==2.10.5
+numpy>=1.24.0
+Pillow>=10.0.0
+opencv-python>=4.8.0
+pydantic>=2.0.0
 
-# Video generation
-opencv-python==4.10.0.84
-
-# Chess task dependencies
-python-chess==1.999
-cairosvg==2.7.1
-
-# Add your task-specific dependencies here
-# Examples:
-# networkx==3.0  # For graph-based tasks (maze)
-# scipy==1.11.0  # For scientific computing
+# No Blender Python package needed (we use subprocess)

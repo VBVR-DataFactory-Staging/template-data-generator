@@ -1,22 +1,14 @@
-"""Setup script."""
-
-from setuptools import setup, find_packages
-from pathlib import Path
-
-readme = Path("README.md").read_text() if Path("README.md").exists() else ""
-
-requirements = []
-if Path("requirements.txt").exists():
-    with open("requirements.txt") as f:
-        requirements = [line.strip() for line in f if line.strip() and not line.startswith("#")]
+from setuptools import find_packages, setup
 
 setup(
-    name="template-data-generator",
-    version="1.0.0",
-    description="Template for creating reasoning task generators",
-    long_description=readme,
-    long_description_content_type="text/markdown",
-    packages=find_packages(include=["core", "core.*", "src", "src.*"]),
+    name="multi-view-data-generator",
+    version="0.1.0",
+    packages=find_packages(),
+    install_requires=[
+        "numpy>=1.24.0",
+        "Pillow>=10.0.0",
+        "opencv-python>=4.8.0",
+        "pydantic>=2.0.0",
+    ],
     python_requires=">=3.8",
-    install_requires=requirements,
 )
