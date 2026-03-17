@@ -1,10 +1,8 @@
 """
-╔══════════════════════════════════════════════════════════════════════════════╗
-║                           YOUR TASK CONFIGURATION                             ║
-║                                                                               ║
-║  CUSTOMIZE THIS FILE to define your task-specific settings.                   ║
-║  Inherits common settings from core.GenerationConfig                          ║
-╚══════════════════════════════════════════════════════════════════════════════╝
+Your task configuration.
+
+CUSTOMIZE THIS FILE to define your task-specific settings.
+Inherits common settings from core.GenerationConfig
 """
 
 from pydantic import Field
@@ -26,16 +24,16 @@ class TaskConfig(GenerationConfig):
         - image_size: tuple[int, int] # Image dimensions
     """
     
-    # ══════════════════════════════════════════════════════════════════════════
+    # ======================================================================
     #  OVERRIDE DEFAULTS
-    # ══════════════════════════════════════════════════════════════════════════
+    # ======================================================================
     
-    domain: str = Field(default="chess")
+    domain: str = Field(default="my_task")
     image_size: tuple[int, int] = Field(default=(512, 512))
     
-    # ══════════════════════════════════════════════════════════════════════════
+    # ======================================================================
     #  VIDEO SETTINGS
-    # ══════════════════════════════════════════════════════════════════════════
+    # ======================================================================
     
     generate_videos: bool = Field(
         default=True,
@@ -47,8 +45,8 @@ class TaskConfig(GenerationConfig):
         description="Video frame rate"
     )
     
-    # ══════════════════════════════════════════════════════════════════════════
+    # ======================================================================
     #  TASK-SPECIFIC SETTINGS
-    # ══════════════════════════════════════════════════════════════════════════
+    # ======================================================================
     
     # Add your custom settings here
