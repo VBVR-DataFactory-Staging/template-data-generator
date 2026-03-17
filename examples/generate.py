@@ -42,8 +42,8 @@ Examples:
     parser.add_argument(
         "--output",
         type=str,
-        default="data/questions",
-        help="Output directory (default: data/questions)"
+        default="./data/questions",
+        help="Output directory (default: ./data/questions)"
     )
     parser.add_argument(
         "--seed",
