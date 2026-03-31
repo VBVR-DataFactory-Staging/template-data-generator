@@ -28,7 +28,15 @@ class OutputWriter:
         # Write prompt
         (task_dir / "prompt.txt").write_text(task_pair.prompt)
         
-        # Write video if provided (preserve original extension)
+        # Write videos if provided (preserve original extension)
+        if task_pair.first_video and Path(task_pair.first_video).exists():
+            video_src = Path(task_pair.first_video)
+            shutil.copy(video_src, task_dir / f"first_video{video_src.suffix}")
+        
+        if task_pair.last_video and Path(task_pair.last_video).exists():
+            video_src = Path(task_pair.last_video)
+            shutil.copy(video_src, task_dir / f"last_video{video_src.suffix}")
+        
         if task_pair.ground_truth_video and Path(task_pair.ground_truth_video).exists():
             video_src = Path(task_pair.ground_truth_video)
             video_ext = video_src.suffix  # .mp4 or .avi
