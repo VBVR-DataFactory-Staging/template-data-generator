@@ -51,10 +51,15 @@ class TaskGenerator(BaseGenerator):
         first_image = self._render_initial_state(task_data)
         final_image = self._render_final_state(task_data)
         
-        # 3. Generate video (optional)
+        # 3. Generate videos (optional)
         video_path = None
+        first_video_path = None
+        last_video_path = None
         if self.config.generate_videos and self.video_generator:
             video_path = self._generate_video(first_image, final_image, task_id, task_data)
+            # Optional: generate first/last segment videos
+            # first_video_path = self._generate_first_video(first_image, task_id, task_data)
+            # last_video_path = self._generate_last_video(final_image, task_id, task_data)
         
         # 4. Select prompt
         prompt = get_prompt(task_data.get("type", "default"))
@@ -68,6 +73,8 @@ class TaskGenerator(BaseGenerator):
             prompt=prompt,
             first_image=first_image,
             final_image=final_image,
+            first_video=first_video_path,
+            last_video=last_video_path,
             ground_truth_video=video_path,
             metadata=metadata,
         )
@@ -123,7 +130,7 @@ class TaskGenerator(BaseGenerator):
         task_id: str,
         task_data: dict,
     ) -> str:
-        """Generate ground truth video. Replace with your animation logic."""
+        """Generate ground truth video (full, beginning to end). Replace with your animation logic."""
         temp_dir = Path(tempfile.gettempdir()) / f"{self.config.domain}_videos"
         temp_dir.mkdir(parents=True, exist_ok=True)
         video_path = temp_dir / f"{task_id}_ground_truth.mp4"
@@ -134,3 +141,33 @@ class TaskGenerator(BaseGenerator):
         )
         
         return str(result) if result else None
+    
+    def _generate_first_video(
+        self,
+        first_image: Image.Image,
+        task_id: str,
+        task_data: dict,
+    ) -> str:
+        """
+        Generate the first segment video (optional).
+        
+        The first frame of this video corresponds to first_frame.png.
+        Replace with your own logic for producing the opening video segment.
+        """
+        # Placeholder: override in your generator to produce the opening segment
+        return None
+    
+    def _generate_last_video(
+        self,
+        final_image: Image.Image,
+        task_id: str,
+        task_data: dict,
+    ) -> str:
+        """
+        Generate the last segment video (optional).
+        
+        The last frame of this video corresponds to final_frame.png.
+        Replace with your own logic for producing the closing video segment.
+        """
+        # Placeholder: override in your generator to produce the closing segment
+        return None

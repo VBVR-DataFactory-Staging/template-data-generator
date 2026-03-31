@@ -53,10 +53,12 @@ Every generator produces:
 
 ```
 data/questions/{domain}_task/{task_id}/
-├── first_frame.png          # Initial state (REQUIRED)
-├── final_frame.png          # Goal state (or goal.txt)
+├── first_frame.png          # Initial state (REQUIRED) — first frame of first_video
+├── final_frame.png          # Goal state (optional) — last frame of last_video
 ├── prompt.txt               # Instructions (REQUIRED)
-└── ground_truth.mp4         # Solution video (OPTIONAL)
+├── first_video.mp4          # Opening segment video (optional)
+├── last_video.mp4           # Closing segment video (optional)
+└── ground_truth.mp4         # Full video, beginning to end (optional)
 ```
 
 ---

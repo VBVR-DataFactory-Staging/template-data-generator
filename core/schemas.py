@@ -11,7 +11,9 @@ class TaskPair(BaseModel):
     prompt: str
     first_image: Any  # PIL Image
     final_image: Optional[Any] = None  # PIL Image
-    ground_truth_video: Optional[str] = None  # Path to video (optional)
+    first_video: Optional[str] = None  # Path to first segment video (optional)
+    last_video: Optional[str] = None  # Path to last segment video (optional)
+    ground_truth_video: Optional[str] = None  # Path to full video (optional)
     metadata: Optional[Dict[str, Any]] = None
     
     class Config:
