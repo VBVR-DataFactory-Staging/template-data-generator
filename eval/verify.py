@@ -182,26 +182,110 @@ def evaluate_visual_quality(frames: List[np.ndarray]) -> float:
 
 
 # ============================================================================
-#  Task-Specific Evaluator — CUSTOMIZE THIS
+#  Task-Specific Evaluator
+#  ─────────────────────────────────────────────────────────────────────────
+#  This is a REAL evaluator taken from VBVR-EvalKit for the G-3 Stable Sort
+#  task (https://github.com/VBVR-DataFactory/G-3_stable_sort_data-generator).
+#
+#  It demonstrates how rule-based evaluation works in practice. When you fork
+#  this template for your own task, replace this class with your own logic.
 # ============================================================================
 
 class TaskEvaluator:
     """
-    Task-specific evaluation logic.
+    G-3: Stable Sort evaluator (from VBVR-EvalKit).
 
-    CUSTOMIZE THIS CLASS for your task. Replace the placeholder implementation
-    with detection/measurement logic relevant to your task.
+    Rule-based evaluation for a task where shapes must be grouped by type
+    and sorted by size (smallest to largest, left to right) on a horizontal line.
 
-    The method evaluate_task_specific() should return a float between 0 and 1.
+    Sub-criteria:
+    - Classification (30%): Shapes correctly grouped by type (same type adjacent)
+    - Order (30%): Each group sorted small → large (left to right)
+    - Fidelity (30%): Shape types, sizes, colours preserved from initial frame
+    - Layout (10%): Horizontal alignment (same y-coordinate)
+
+    Replace this entire class with your own task-specific evaluation logic.
     """
 
-    # Define your task's sub-criteria and their weights (must sum to 1.0).
-    # Example for a color-change task:
     TASK_WEIGHTS = {
-        "color_accuracy": 0.50,
-        "transition_quality": 0.30,
-        "object_preservation": 0.20,
+        "classification": 0.30,
+        "order": 0.30,
+        "fidelity": 0.30,
+        "layout": 0.10,
     }
+
+    # ── Shape detection ───────────────────────────────────────────────────
+
+    def _detect_shapes(self, frame: np.ndarray) -> List[Dict]:
+        """Detect coloured shapes and return their properties."""
+        hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+
+        # Find non-white/non-black areas (coloured shapes)
+        mask = cv2.inRange(hsv, np.array([0, 30, 30]), np.array([180, 255, 255]))
+
+        contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+        shapes = []
+        for cnt in contours:
+            area = cv2.contourArea(cnt)
+            if area < 500:  # Skip noise
+                continue
+
+            M = cv2.moments(cnt)
+            if M["m00"] == 0:
+                continue
+            cx = int(M["m10"] / M["m00"])
+            cy = int(M["m01"] / M["m00"])
+
+            # Determine shape type by vertex count
+            approx = cv2.approxPolyDP(cnt, 0.04 * cv2.arcLength(cnt, True), True)
+            vertices = len(approx)
+
+            if vertices == 3:
+                shape_type = "triangle"
+            elif vertices == 4:
+                shape_type = "square"
+            else:
+                shape_type = "circle"
+
+            # Get dominant colour at centroid region
+            colour = frame[max(0, cy - 5) : cy + 5, max(0, cx - 5) : cx + 5].mean(axis=(0, 1))
+
+            shapes.append(
+                {
+                    "type": shape_type,
+                    "center": (cx, cy),
+                    "area": area,
+                    "color": tuple(colour.astype(int).tolist()),
+                }
+            )
+
+        return shapes
+
+    def _color_distance(self, c1: Tuple, c2: Tuple) -> float:
+        """Euclidean distance between two BGR colour tuples."""
+        return float(np.sqrt(sum((a - b) ** 2 for a, b in zip(c1, c2))))
+
+    def _group_by_color(self, shapes: List[Dict], threshold: float = 50) -> Dict[str, List[Dict]]:
+        """Group shapes by similar colour."""
+        if not shapes:
+            return {}
+
+        groups: Dict[str, List[Dict]] = {}
+        for shape in shapes:
+            colour = shape["color"]
+            matched = False
+            for group_colour_str, group_shapes in groups.items():
+                if self._color_distance(colour, eval(group_colour_str)) < threshold:
+                    group_shapes.append(shape)
+                    matched = True
+                    break
+            if not matched:
+                groups[str(colour)] = [shape]
+
+        return groups
+
+    # ── Main evaluation ───────────────────────────────────────────────────
 
     def evaluate_task_specific(
         self,
@@ -210,57 +294,81 @@ class TaskEvaluator:
         gt_first_frame: Optional[np.ndarray],
         gt_final_frame: Optional[np.ndarray],
     ) -> float:
-        """
-        Evaluate task-specific criteria.
-
-        Args:
-            video_frames: Frames from the model-generated video.
-            gt_frames: Frames from the ground truth video (may be empty).
-            gt_first_frame: Ground truth first frame image.
-            gt_final_frame: Ground truth final frame image.
-
-        Returns:
-            Score between 0.0 and 1.0.
-        """
-        if not video_frames:
+        """Evaluate stable-sort task with rule-based logic."""
+        if len(video_frames) < 2:
             return 0.0
 
-        scores = {}
-
+        first_frame = video_frames[0]
         last_frame = video_frames[-1]
 
-        # ── Color accuracy (50%) ──────────────────────────────────────────
-        # Placeholder: compare dominant colour of final frame to GT.
-        if gt_final_frame is not None:
-            gen_mean = last_frame.mean(axis=(0, 1))
-            gt_mean = gt_final_frame.mean(axis=(0, 1))
-            diff = float(np.linalg.norm(gen_mean - gt_mean))
-            scores["color_accuracy"] = max(0.0, 1.0 - diff / 255.0)
-        else:
-            scores["color_accuracy"] = 0.0
+        # Detect shapes in initial and final frames
+        initial_shapes = self._detect_shapes(first_frame)
+        final_shapes = self._detect_shapes(last_frame)
+        gt_final_shapes = self._detect_shapes(gt_final_frame) if gt_final_frame is not None else []
 
-        # ── Transition quality (30%) ──────────────────────────────────────
-        # Placeholder: check for smooth colour transition across frames.
-        if len(video_frames) > 1:
-            means = [f.mean() for f in video_frames]
-            monotonic = sum(
-                1 for i in range(len(means) - 1)
-                if (means[i + 1] >= means[i]) or abs(means[i + 1] - means[i]) < 5
+        scores: Dict[str, float] = {}
+
+        # 1. Classification (30%) — are shapes grouped by type/colour?
+        final_groups = self._group_by_color(final_shapes)
+        gt_groups = self._group_by_color(gt_final_shapes) if gt_final_shapes else final_groups
+
+        if len(final_shapes) >= 6 and len(final_groups) >= 2:
+            # Sort shapes left-to-right and count colour transitions
+            final_sorted = sorted(final_shapes, key=lambda s: s["center"][0])
+
+            transitions = 0
+            for i in range(1, len(final_sorted)):
+                if self._color_distance(final_sorted[i]["color"], final_sorted[i - 1]["color"]) > 50:
+                    transitions += 1
+
+            expected_transitions = len(final_groups) - 1
+            if transitions <= expected_transitions:
+                scores["classification"] = 1.0
+            else:
+                scores["classification"] = max(0, 1.0 - (transitions - expected_transitions) * 0.3)
+        else:
+            scores["classification"] = max(0, len(final_shapes) / 6.0) * 0.5
+
+        # 2. Order (30%) — each group sorted small→large left→right?
+        order_score = 0.0
+        if final_groups:
+            group_scores = []
+            for group_shapes in final_groups.values():
+                if len(group_shapes) >= 2:
+                    sorted_by_x = sorted(group_shapes, key=lambda s: s["center"][0])
+                    sizes = [s["area"] for s in sorted_by_x]
+                    correct_pairs = sum(1 for i in range(len(sizes) - 1) if sizes[i] < sizes[i + 1])
+                    total_pairs = len(sizes) - 1
+                    group_scores.append(correct_pairs / total_pairs if total_pairs > 0 else 1.0)
+            order_score = float(np.mean(group_scores)) if group_scores else 0.5
+        scores["order"] = order_score
+
+        # 3. Fidelity (30%) — shapes preserved from initial frame?
+        fidelity_score = 0.0
+        if initial_shapes and final_shapes:
+            count_match = max(0, 1.0 - abs(len(initial_shapes) - len(final_shapes)) / max(len(initial_shapes), 1))
+            initial_total_area = sum(s["area"] for s in initial_shapes)
+            final_total_area = sum(s["area"] for s in final_shapes)
+            area_ratio = (
+                min(initial_total_area, final_total_area) / max(initial_total_area, final_total_area)
+                if max(initial_total_area, final_total_area) > 0
+                else 0
             )
-            scores["transition_quality"] = monotonic / max(len(means) - 1, 1)
-        else:
-            scores["transition_quality"] = 0.5
+            initial_types = sorted([s["type"] for s in initial_shapes])
+            final_types = sorted([s["type"] for s in final_shapes])
+            type_match = sum(1 for a, b in zip(initial_types, final_types) if a == b) / max(
+                len(initial_types), len(final_types), 1
+            )
+            fidelity_score = 0.4 * count_match + 0.3 * area_ratio + 0.3 * type_match
+        scores["fidelity"] = fidelity_score
 
-        # ── Object preservation (20%) ─────────────────────────────────────
-        # Placeholder: compare first frame structure to last frame.
-        if gt_first_frame is not None and len(video_frames) > 0:
-            first = video_frames[0]
-            if first.shape != gt_first_frame.shape:
-                gt_first_frame = normalize_frame_size(gt_first_frame, first)
-            ssim = compute_ssim(first, gt_first_frame)
-            scores["object_preservation"] = ssim
-        else:
-            scores["object_preservation"] = 0.5
+        # 4. Layout (10%) — horizontal alignment?
+        layout_score = 0.0
+        if final_shapes:
+            y_coords = [s["center"][1] for s in final_shapes]
+            y_variance = float(np.var(y_coords))
+            layout_score = max(0, 1.0 - y_variance / 5000.0)
+        scores["layout"] = layout_score
 
         return sum(scores[k] * self.TASK_WEIGHTS[k] for k in self.TASK_WEIGHTS)
 
