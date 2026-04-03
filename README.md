@@ -4,6 +4,14 @@ A minimal template for creating synthetic reasoning task generators. Fork this a
 
 ---
 
+## Ground Truth Video Philosophy
+
+> There may be many videos that could score 100% on EVAL — but our ground truth video **must** score 100%.
+
+The ground truth video is the canonical reference answer. It is not merely *a* correct solution; it is *the* definitive solution that the evaluation system is measured against. If the ground truth itself does not achieve a perfect score on EVAL, then either the ground truth or the evaluation is broken — and that must be fixed before anything else.
+
+---
+
 ## 🚀 Quick Start
 
 ```bash
