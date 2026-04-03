@@ -42,6 +42,9 @@ template-data-generator/
 │   └── config.py           # Your configuration
 ├── examples/
 │   └── generate.py         # Entry point
+├── eval/                    # 🧪 STANDALONE: Evaluation
+│   ├── verify.py           # Automated evaluation script
+│   └── EVAL.md             # Evaluation guide & instructions
 └── data/questions/         # Generated output
 ```
 
@@ -139,3 +142,16 @@ class TaskConfig(GenerationConfig):
 ```
 
 **Single entry point:** `python examples/generate.py --num-samples 50`
+
+---
+
+## 🧪 Eval Module
+
+The `eval/` directory is standalone — it does not depend on `core/` or `src/`. It should contain everything needed to evaluate the task outputs. This could be:
+
+- **Rule-based evaluation** — automated scoring scripts (see `eval/verify.py`)
+- **Human evaluation** — rubrics, guidelines, comparison templates
+- **VLM-as-judge** — prompts and scripts for using vision-language models as evaluators
+- **Any combination** — whatever fits your task
+
+See `eval/EVAL.md` for the full evaluation guide.
