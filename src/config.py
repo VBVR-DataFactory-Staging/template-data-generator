@@ -1,52 +1,28 @@
-"""
-Your task configuration.
+"""Default task configuration for G-29 Chart Extreme With Data."""
 
-CUSTOMIZE THIS FILE to define your task-specific settings.
-Inherits common settings from core.GenerationConfig
-"""
+from typing import Tuple
 
 from pydantic import Field
+
 from core import GenerationConfig
 
 
 class TaskConfig(GenerationConfig):
-    """
-    Your task-specific configuration.
-    
-    CUSTOMIZE THIS CLASS to add your task's hyperparameters.
-    
-    Inherited from GenerationConfig:
-        - num_samples: int          # Number of samples to generate
-        - domain: str               # Task domain name
-        - difficulty: Optional[str] # Difficulty level
-        - random_seed: Optional[int] # For reproducibility
-        - output_dir: Path          # Where to save outputs
-        - image_size: tuple[int, int] # Image dimensions
-    """
-    
-    # ======================================================================
-    #  OVERRIDE DEFAULTS
-    # ======================================================================
-    
-    domain: str = Field(default="my_task")
-    image_size: tuple[int, int] = Field(default=(512, 512))
-    
-    # ======================================================================
-    #  VIDEO SETTINGS
-    # ======================================================================
-    
+    """Configuration for the default chart-extreme task."""
+
+    domain: str = Field(default="chart_extreme_with_data")
+    image_size: Tuple[int, int] = Field(default=(1024, 1024))
+
     generate_videos: bool = Field(
         default=True,
-        description="Whether to generate ground truth videos"
+        description="Whether to generate ground truth videos",
     )
-    
     video_fps: int = Field(
-        default=10,
-        description="Video frame rate"
+        default=16,
+        description="Video frame rate",
     )
-    
-    # ======================================================================
-    #  TASK-SPECIFIC SETTINGS
-    # ======================================================================
-    
-    # Add your custom settings here
+
+    chart_types: Tuple[str, ...] = Field(
+        default=("bar", "line", "scatter", "pie"),
+        description="Chart types enabled for default generation",
+    )

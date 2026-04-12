@@ -1,6 +1,6 @@
 # Template Data Generator 🎲
 
-A minimal template for creating synthetic reasoning task generators. Fork this and customize it for your own task (maze, sudoku, rotation, etc.).
+A minimal template for creating synthetic reasoning task generators. The repository now ships with **G-29: Chart Extreme With Data** as the default built-in task, while keeping the `core/` + `src/` structure easy to fork for other tasks.
 
 ---
 
@@ -74,9 +74,11 @@ data/questions/{domain}_task/{task_id}/
 
 ---
 
-## 🎨 Customization (3 Files to Modify)
+## 🎨 Customization (Default Task Included)
 
 ### 1. Update `src/generator.py`
+
+The current default implementation is `G-29: Chart Extreme With Data`. Replace it if you want a different task, or use it as a concrete example of how to structure a real generator and evaluator pair.
 
 Replace the example chess generator with your task:
 
